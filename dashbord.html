@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grant Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e2f0fc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .view-toggle button {
+            padding: 10px 20px;
+            border: none;
+            font-size: 1.1em;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 0 10px;
+        }
+        .view-toggle button:hover {
+            background-color: #0056be;
+        }
+        .kpi-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .kpi-box {
+            background-color: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(31,37,105,0.25);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.18);
+            text-align: center;
+            width: 30%;
+            min-width: 200px;
+            margin: 10px;
+            color: #333;
+        }
+        .kpi-box h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .kpi-box p {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+            margin: 0;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .chart-container {
+            background-color: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(31,37,105,0.25);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+        .chart-container h2 {
+            color: #333;
+        }
+        #individual-table {
+            grid-column: 1 / -1;
+            overflow-x: auto;
+            box-shadow: 0 8px 32px rgba(31,37,105,0.25);
+            backdrop-filter: blur(5px);
+            background-color: rgba(255,255,255,0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dde6f7;
+            padding: 8px;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+    <script>
+        const DATA = [
+            {"Category":"Teacher Grants","Subcategory":"Ochoa, Leah","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Alcala-Mosley, Mishana","Budget":200.0,"YTD_Actual":22.44,"Ending_Balance":177.56,"Fund_Restriction":"Restricted","Notes":"Scholastic News (24 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Wong, Valene","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Perez-Huyhn, Amelia","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Jones, Jennifer","Budget":200.0,"YTD_Actual":22.44,"Ending_Balance":177.56,"Fund_Restriction":"Restricted","Notes":"Scholastic News (24 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Chapman, Rotonda","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Zavala, Jill","Budget":200.0,"YTD_Actual":22.44,"Ending_Balance":177.56,"Fund_Restriction":"Restricted","Notes":"Scholastic News (24 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Gary, Lemuel","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Vu, Zachary","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Tamosunas, Amy","Budget":200.0,"YTD_Actual":28.05,"Ending_Balance":171.95,"Fund_Restriction":"Restricted","Notes":"Scholastic News (30 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Ashford, Lashea","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Carlson-Kelton, Jocelyn","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Nielsen, Lynette","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Chen, Emily","Budget":200.0,"YTD_Actual":28.05,"Ending_Balance":171.95,"Fund_Restriction":"Restricted","Notes":"Scholastic News (30 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Ferrera, Robert","Budget":200.0,"YTD_Actual":28.05,"Ending_Balance":171.95,"Fund_Restriction":"Restricted","Notes":"Scholastic News (30 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Frates, Greg","Budget":200.0,"YTD_Actual":28.05,"Ending_Balance":171.95,"Fund_Restriction":"Restricted","Notes":"Scholastic News (30 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Normart, Johanna","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Pagonis, Maria","Budget":200.0,"YTD_Actual":21.51,"Ending_Balance":178.49,"Fund_Restriction":"Restricted","Notes":"Scholastic News (23 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Barrientos, Carolyn","Budget":200.0,"YTD_Actual":21.51,"Ending_Balance":178.49,"Fund_Restriction":"Restricted","Notes":"Scholastic News (23 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Feikert, Lesley","Budget":200.0,"YTD_Actual":21.51,"Ending_Balance":178.49,"Fund_Restriction":"Restricted","Notes":"Scholastic News (23 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Adatan, Vanessa","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Sturholm, Jessica","Budget":200.0,"YTD_Actual":11.22,"Ending_Balance":188.78,"Fund_Restriction":"Restricted","Notes":"Scholastic News (12 paper copies)"},
+            {"Category":"Teacher Grants","Subcategory":"Holbrook, Bryan","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Taylor, Deidre","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Mijares, Seth","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Rosenblum, Toby","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Uribe, Stephanie","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Orren, Louis","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Receipts","Subcategory":"Membership Dues (Per Caps @ $4.25 each member)","Budget":200.0,"YTD_Actual":265.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"*$1 less per person (200?)"},
+            {"Category":"Fundraising","Subcategory":"Box Tops","Budget":5.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"0"},
+            {"Category":"Fundraising","Subcategory":"P.B.I.S. (Wed sales, event concession sales)","Budget":0.0,"YTD_Actual":10.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"0"},
+            {"Category":"Fundraising","Subcategory":"Pennies for P.E.","Budget":0.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"0"},
+            {"Category":"Fundraising","Subcategory":"Donations","Budget":500.0,"YTD_Actual":564.71,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"500"},
+            {"Category":"Fundraising","Subcategory":"Spirit Wear","Budget":0.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"0"},
+            {"Category":"Fundraising","Subcategory":"Sep Read-a-thon","Budget":5000.0,"YTD_Actual":7630.2,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"7500"},
+            {"Category":"Fundraising","Subcategory":"Chuck-e-Cheese","Budget":3000.0,"YTD_Actual":2252.94,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"3000"},
+            {"Category":"Fundraising","Subcategory":"Spring Fun-run","Budget":3000.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Fundraising","Subcategory":"Jamba Juice","Budget":200.0,"YTD_Actual":120.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"200"},
+            {"Category":"Events","Subcategory":"Fall Festival/Trunk or Treat","Budget":1000.0,"YTD_Actual":2227.56,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"2000"},
+            {"Category":"Events","Subcategory":"Movie Nights","Budget":0.0,"YTD_Actual":2.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"0"},
+            {"Category":"Events","Subcategory":"Family Paint Night","Budget":500.0,"YTD_Actual":1041.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"1000"},
+            {"Category":"Teacher Programs","Subcategory":"-TK/Kinder Project Based Learning (PBL) and Field Trips","Budget":10000.0,"YTD_Actual":10500.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Teacher Programs","Subcategory":"-1st Grade Project Based Learning (PBL) and Field Trips","Budget":5000.0,"YTD_Actual":6000.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Teacher Programs","Subcategory":"-Gardening Program","Budget":1000.0,"YTD_Actual":1400.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Teacher Programs","Subcategory":"-Neurodiversity Program","Budget":0.0,"YTD_Actual":653.92,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Teacher Programs","Subcategory":"Teacher Grants Money Returned","Budget":0.0,"YTD_Actual":92.7,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Operating Expenses","Subcategory":"Flyers (Paper, Copies)","Budget":50.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Operating Expenses","Subcategory":"Mailing (Stamps, Envelopes)","Budget":50.0,"YTD_Actual":14.6,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Operating Expenses","Subcategory":"Taxes State & Federal Prepared","Budget":100.0,"YTD_Actual":90.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"0"},
+            {"Category":"Operating Expenses","Subcategory":"Insurance","Budget":300.0,"YTD_Actual":288.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Operating Expenses","Subcategory":"DOJ Renewal Fee","Budget":25.0,"YTD_Actual":25.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Program Expenses","Subcategory":"Staff Appreciation","Budget":1000.0,"YTD_Actual":823.81,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Program Expenses","Subcategory":"P.B.I.S.","Budget":0.0,"YTD_Actual":3957.14,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":"??? we need to help fund this"},
+            {"Category":"Program Expenses","Subcategory":"P.E.","Budget":0.0,"YTD_Actual":1146.78,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":"0"},
+            {"Category":"Program Expenses","Subcategory":"Swank Movie Licensing","Budget":550.0,"YTD_Actual":550.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Program Expenses","Subcategory":"School Field Trips","Budget":0.0,"YTD_Actual":400.87,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":"0"},
+            {"Category":"Program Expenses","Subcategory":"-TK/Kinder Project Based Learning (PBL) and Field Trips","Budget":10000.0,"YTD_Actual":13799.32,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Program Expenses","Subcategory":"-1st Grade Project Based Learning (PBL) and Field Trips","Budget":5000.0,"YTD_Actual":5044.68,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Program Expenses","Subcategory":"-Gardening Program","Budget":1000.0,"YTD_Actual":1400.0,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Program Expenses","Subcategory":"-Neurodiversity Program","Budget":653.92,"YTD_Actual":521.34,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":"that's what they have"},
+            {"Category":"Program Expenses","Subcategory":"Teacher Grants ($200 per teacher)","Budget":5600.0,"YTD_Actual":1952.21,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":"5400"},
+            {"Category":"Schoolwide Supplies","Subcategory":"Folders TK-3","Budget":200.0,"YTD_Actual":117.19,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"whole school? buy soon?"},
+            {"Category":"Schoolwide Supplies","Subcategory":"Scholastic News","Budget":3000.0,"YTD_Actual":2212.48,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Schoolwide Supplies","Subcategory":"Misc (bulletin boards, hangers, etc.)","Budget":300.0,"YTD_Actual":3.82,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"less?"},
+            {"Category":"Fundraising and Events","Subcategory":"Jamba Juice","Budget":0.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"not buying more?"},
+            {"Category":"Fundraising and Events","Subcategory":"Membership Drive (pizza party)","Budget":0.0,"YTD_Actual":232.23,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"$250.00"},
+            {"Category":"Fundraising and Events","Subcategory":"Read-a-thon (prizes)","Budget":300.0,"YTD_Actual":280.1,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Fundraising and Events","Subcategory":"Misc School Wide Events (Family Picnic, etc.)","Budget":200.0,"YTD_Actual":14.98,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Fundraising and Events","Subcategory":"Fall Festival/Trunk or Treat (materials, candy, cake walk)","Budget":800.0,"YTD_Actual":1038.68,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"$1,000.00"},
+            {"Category":"Fundraising and Events","Subcategory":"Santa Bingo Night (prizes)","Budget":500.0,"YTD_Actual":432.16,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"500"},
+            {"Category":"Fundraising and Events","Subcategory":"Riley Santa Letters","Budget":100.0,"YTD_Actual":378.41,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"100"},
+            {"Category":"Fundraising and Events","Subcategory":"Family Movie Nights (concessions)","Budget":250.0,"YTD_Actual":241.05,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"250"},
+            {"Category":"Fundraising and Events","Subcategory":"Family Paint Night (canvas, food, thank you gift)","Budget":800.0,"YTD_Actual":706.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"*paint/paintbrushes donated"},
+            {"Category":"Fundraising and Events","Subcategory":"Spring Fun Run","Budget":1000.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":"*Est: $400 upfront, then 10% of funds raised"},
+            {"Category":"Fundraising and Events","Subcategory":"6th Grade Graduation Party","Budget":500.0,"YTD_Actual":230.71,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Fundraising and Events","Subcategory":"6th Grade Awards","Budget":500.0,"YTD_Actual":468.24,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""},
+            {"Category":"Fundraising and Events","Subcategory":"Kindergarten Graduation (cakes)","Budget":100.0,"YTD_Actual":96.96,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""}
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const boardView = document.getElementById('board-view');
+            const restrictedView = document.getElementById('restricted-view');
+            const boardBtn = document.getElementById('board-btn');
+            const restrictedBtn = document.getElementById('restricted-btn');
+
+            const currencyFormatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+
+            function renderBoardView() {
+                const totalSpent = DATA.reduce((sum, item) => sum + item.YTD_Actual, 0);
+                const totalBudget = DATA.reduce((sum, item) => sum + item.Budget, 0);
+                const totalRemaining = totalBudget - totalSpent;
+
+                const restrictedData = DATA.filter(item => item.Fund_Restriction === 'Restricted');
+                const unrestrictedData = DATA.filter(item => item.Fund_Restriction === 'Unrestricted');
+
+                const totalRestrictedSpent = restrictedData.reduce((sum, item) => sum + item.YTD_Actual, 0);
+                const totalUnrestrictedSpent = unrestrictedData.reduce((sum, item) => sum + item.YTD_Actual, 0);
+                const totalRestrictedBudget = restrictedData.reduce((sum, item) => sum + item.Budget, 0);
+
+                document.getElementById('kpi-container').innerHTML = `
+                    <div class="kpi-box"><h3>Total Budget</h3><p>${currencyFormatter.format(totalBudget)}</p></div>
+                    <div class="kpi-box"><h3>Total Actual Spent</h3><p>${currencyFormatter.format(totalSpent)}</p></div>
+                    <div class="kpi-box"><h3>Total Unrestricted Budget</h3><p>${currencyFormatter.format(totalUnrestrictedSpent)}</p></div>
+                    <div class="kpi-box"><h3>Total Restricted Budget</h3><p>${currencyFormatter.format(totalRestrictedBudget)}</p></div>
+                `;
+
+                const pieData = [{
+                    labels: ['Restricted Funds', 'Unrestricted Funds'],
+                    values: [totalRestrictedSpent, totalUnrestrictedSpent],
+                    type: 'pie',
+                    marker: {
+                        colors: ['#dc3545', '#28a745']
+                    }
+                }];
+                const pieLayout = {
+                    title: 'YTD Actual Spent: Restricted vs Unrestricted',
+                    height: 400,
+                    margin: { t: 40, b: 0, l: 0, r: 0 }
+                };
+                Plotly.newPlot('board-view-pie', pieData, pieLayout);
+
+                const spendingByCategory = DATA.reduce((acc, item) => {
+                    if (item.Category) {
+                        if (!acc[item.Category]) {
+                            acc[item.Category] = { Restricted: 0, Unrestricted: 0 };
+                        }
+                        if (item.Fund_Restriction === 'Restricted') {
+                            acc[item.Category].Restricted += item.YTD_Actual;
+                        } else {
+                            acc[item.Category].Unrestricted += item.YTD_Actual;
+                        }
+                    }
+                    return acc;
+                }, {});
+
+                const categories = Object.keys(spendingByCategory);
+                const restrictedValues = categories.map(cat => spendingByCategory[cat].Restricted);
+                const unrestrictedValues = categories.map(cat => spendingByCategory[cat].Unrestricted);
+                
+                const barData = [
+                    {
+                        x: categories,
+                        y: restrictedValues,
+                        name: 'Restricted Funds',
+                        type: 'bar',
+                        marker: { color: '#dc3545' }
+                    },
+                    {
+                        x: categories,
+                        y: unrestrictedValues,
+                        name: 'Unrestricted Funds',
+                        type: 'bar',
+                        marker: { color: '#28a745' }
+                    }
+                ];
+                const barLayout = {
+                    title: 'Spending by Category',
+                    barmode: 'stack',
+                    height: 400,
+                    margin: { t: 40, b: 100, l: 40, r: 40 },
+                    xaxis: { title: 'Category', automargin: true },
+                    yaxis: { title: 'Amount Spent ($)' }
+                };
+                Plotly.newPlot('board-view-bar', barData, barLayout);
+            }
+
+            function renderRestrictedView() {
+                const restrictedFunds = DATA.filter(item => item.Fund_Restriction === 'Restricted');
+                const tableContainer = document.getElementById('restricted-table');
+
+                let tableHTML = `
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Project Name</th>
+                                <th>Budget</th>
+                                <th>Actual Spent</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                restrictedFunds.forEach(item => {
+                    tableHTML += `
+                        <tr>
+                            <td>${item.Category || 'N/A'}</td>
+                            <td>${item.Subcategory || 'N/A'}</td>
+                            <td>${currencyFormatter.format(item.Budget)}</td>
+                            <td>${currencyFormatter.format(item.YTD_Actual)}</td>
+                            <td>${item.Notes || ''}</td>
+                        </tr>
+                    `;
+                });
+                tableHTML += '</tbody></table>';
+                tableContainer.innerHTML = tableHTML;
+            }
+
+            boardBtn.addEventListener('click', () => {
+                boardView.classList.remove('hide');
+                restrictedView.classList.add('hide');
+            });
+
+            restrictedBtn.addEventListener('click', () => {
+                boardView.classList.add('hide');
+                restrictedView.classList.remove('hide');
+                renderRestrictedView();
+            });
+
+            renderBoardView();
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>PTSA Funds Dashboard</h1>
+
+    <div class="view-toggle">
+        <button id="board-btn">Board-Level View</button>
+        <button id="restricted-btn">Restricted Funds View</button>
+    </div>
+
+    <div id="board-view">
+        <div class="kpi-container" id="kpi-container"></div>
+        <div class="dashboard-grid">
+            <div class="chart-container">
+                <div id="board-view-pie"></div>
+            </div>
+            <div class="chart-container">
+                <div id="board-view-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="restricted-view" class="hide">
+        <div id="individual-table">
+            <h2>Restricted Funds Details</h2>
+            <div id="restricted-table"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
