@@ -10,34 +10,38 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #e2f0fc;
+            background-color: #f5f5f5; /* Light gray background */
         }
         .container {
             max-width: 1200px;
             margin: auto;
         }
-        h1 {
+        .header {
             text-align: center;
-            color: #333;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 150px;
+            margin-bottom: 10px;
         }
         .view-toggle {
             display: flex;
             justify-content: center;
             margin: 20px 0;
+            gap: 20px;
         }
         .view-toggle button {
             padding: 10px 20px;
             border: none;
             font-size: 1.1em;
             color: #fff;
-            background-color: #007bff;
+            background-color: #21cc72; /* Green */
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin: 0 10px;
         }
         .view-toggle button:hover {
-            background-color: #0056be;
+            background-color: #1aa65e; /* Darker green */
         }
         .kpi-container {
             display: flex;
@@ -46,26 +50,24 @@
             margin-bottom: 20px;
         }
         .kpi-box {
-            background-color: rgba(255,255,255,0.5);
+            background-color: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(31,37,105,0.25);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.11);
             text-align: center;
-            width: 30%;
-            min-width: 200px;
+            width: 22%; /* Adjusted width for 4 boxes */
+            min-width: 150px;
             margin: 10px;
             color: #333;
         }
         .kpi-box h3 {
             margin: 0 0 10px 0;
-            color: #333;
+            color: #555;
         }
         .kpi-box p {
             font-size: 2em;
             font-weight: bold;
-            color: #007bff;
+            color: #21cc72; /* Green */
             margin: 0;
         }
         .dashboard-grid {
@@ -74,37 +76,32 @@
             gap: 20px;
         }
         .chart-container {
-            background-color: rgba(255,255,255,0.5);
+            background-color: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(31,37,105,0.25);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.11);
         }
         .chart-container h2 {
             color: #333;
         }
-        #individual-table {
-            grid-column: 1 / -1;
+        .table-container {
             overflow-x: auto;
-            box-shadow: 0 8px 32px rgba(31,37,105,0.25);
-            backdrop-filter: blur(5px);
-            background-color: rgba(255,255,255,0.5);
+            background-color: #fff;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.11);
+            margin-top: 20px;
+            padding: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 0;
         }
         th, td {
-            border: 1px solid #dde6f7;
+            border: 1px solid #eee;
             padding: 8px;
             text-align: left;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            white-space: normal;
         }
         th {
             background-color: #f2f2f2;
@@ -114,7 +111,7 @@
         }
     </style>
     <script>
-        const DATA = [
+        const CLEANED_DATA = [
             {"Category":"Teacher Grants","Subcategory":"Ochoa, Leah","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
             {"Category":"Teacher Grants","Subcategory":"Alcala-Mosley, Mishana","Budget":200.0,"YTD_Actual":22.44,"Ending_Balance":177.56,"Fund_Restriction":"Restricted","Notes":"Scholastic News (24 paper copies)"},
             {"Category":"Teacher Grants","Subcategory":"Wong, Valene","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
@@ -135,7 +132,7 @@
             {"Category":"Teacher Grants","Subcategory":"Pagonis, Maria","Budget":200.0,"YTD_Actual":21.51,"Ending_Balance":178.49,"Fund_Restriction":"Restricted","Notes":"Scholastic News (23 paper copies)"},
             {"Category":"Teacher Grants","Subcategory":"Barrientos, Carolyn","Budget":200.0,"YTD_Actual":21.51,"Ending_Balance":178.49,"Fund_Restriction":"Restricted","Notes":"Scholastic News (23 paper copies)"},
             {"Category":"Teacher Grants","Subcategory":"Feikert, Lesley","Budget":200.0,"YTD_Actual":21.51,"Ending_Balance":178.49,"Fund_Restriction":"Restricted","Notes":"Scholastic News (23 paper copies)"},
-            {"Category":"Teacher Grants","Subcategory":"Adatan, Vanessa","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":0.0,"Fund_Restriction":"Restricted","Notes":""},
+            {"Category":"Teacher Grants","Subcategory":"Adatan, Vanessa","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
             {"Category":"Teacher Grants","Subcategory":"Sturholm, Jessica","Budget":200.0,"YTD_Actual":11.22,"Ending_Balance":188.78,"Fund_Restriction":"Restricted","Notes":"Scholastic News (12 paper copies)"},
             {"Category":"Teacher Grants","Subcategory":"Holbrook, Bryan","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
             {"Category":"Teacher Grants","Subcategory":"Taylor, Deidre","Budget":200.0,"YTD_Actual":0.0,"Ending_Balance":200.0,"Fund_Restriction":"Restricted","Notes":""},
@@ -197,8 +194,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             const boardView = document.getElementById('board-view');
             const restrictedView = document.getElementById('restricted-view');
+            const staticBudgetView = document.getElementById('static-budget-view');
+
             const boardBtn = document.getElementById('board-btn');
             const restrictedBtn = document.getElementById('restricted-btn');
+            const staticBudgetBtn = document.getElementById('static-budget-btn');
 
             const currencyFormatter = new Intl.NumberFormat('en-US', {
                 style: 'currency',
@@ -207,50 +207,60 @@
                 maximumFractionDigits: 2,
             });
 
+            // Function to render the Board-Level View
             function renderBoardView() {
-                const totalSpent = DATA.reduce((sum, item) => sum + item.YTD_Actual, 0);
-                const totalBudget = DATA.reduce((sum, item) => sum + item.Budget, 0);
-                const totalRemaining = totalBudget - totalSpent;
+                const totalBudget = CLEANED_DATA.reduce((sum, item) => sum + item.Budget, 0);
+                const totalSpent = CLEANED_DATA.reduce((sum, item) => sum + item.YTD_Actual, 0);
+                
+                const restrictedData = CLEANED_DATA.filter(item => item.Fund_Restriction === 'Restricted');
+                const unrestrictedData = CLEANED_DATA.filter(item => item.Fund_Restriction === 'Unrestricted');
 
-                const restrictedData = DATA.filter(item => item.Fund_Restriction === 'Restricted');
-                const unrestrictedData = DATA.filter(item => item.Fund_Restriction === 'Unrestricted');
-
+                const totalRestrictedBudget = restrictedData.reduce((sum, item) => sum + item.Budget, 0);
+                const totalUnrestrictedBudget = unrestrictedData.reduce((sum, item) => sum + item.Budget, 0);
+                
                 const totalRestrictedSpent = restrictedData.reduce((sum, item) => sum + item.YTD_Actual, 0);
                 const totalUnrestrictedSpent = unrestrictedData.reduce((sum, item) => sum + item.YTD_Actual, 0);
-                const totalRestrictedBudget = restrictedData.reduce((sum, item) => sum + item.Budget, 0);
+
+                const restrictedEndingBalance = totalRestrictedBudget - totalRestrictedSpent;
+                const unrestrictedEndingBalance = totalUnrestrictedBudget - totalUnrestrictedSpent;
 
                 document.getElementById('kpi-container').innerHTML = `
-                    <div class="kpi-box"><h3>Total Budget</h3><p>${currencyFormatter.format(totalBudget)}</p></div>
-                    <div class="kpi-box"><h3>Total Actual Spent</h3><p>${currencyFormatter.format(totalSpent)}</p></div>
-                    <div class="kpi-box"><h3>Total Unrestricted Budget</h3><p>${currencyFormatter.format(totalUnrestrictedSpent)}</p></div>
-                    <div class="kpi-box"><h3>Total Restricted Budget</h3><p>${currencyFormatter.format(totalRestrictedBudget)}</p></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totalBudget)}</p><h3>Total Budget</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totalSpent)}</p><h3>Total Actual Spent</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totalUnrestrictedBudget)}</p><h3>Total Unrestricted Budget</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(unrestrictedEndingBalance)}</p><h3>Total Unrestricted Balance</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totalRestrictedBudget)}</p><h3>Total Restricted Budget</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(restrictedEndingBalance)}</p><h3>Total Restricted Balance</h3></div>
                 `;
-
+                
                 const pieData = [{
-                    labels: ['Restricted Funds', 'Unrestricted Funds'],
+                    labels: ['Restricted Funds Spent', 'Unrestricted Funds Spent'],
                     values: [totalRestrictedSpent, totalUnrestrictedSpent],
                     type: 'pie',
                     marker: {
-                        colors: ['#dc3545', '#28a745']
-                    }
+                        colors: ['#ffc107', '#21cc72'] // Yellow for Restricted, Green for Unrestricted
+                    },
+                    hoverinfo: 'label+percent+value',
+                    textinfo: 'percent',
+                    textposition: 'inside'
                 }];
                 const pieLayout = {
                     title: 'YTD Actual Spent: Restricted vs Unrestricted',
                     height: 400,
-                    margin: { t: 40, b: 0, l: 0, r: 0 }
+                    margin: { t: 40, b: 0, l: 0, r: 0 },
+                    font: { family: 'Arial, sans-serif' }
                 };
                 Plotly.newPlot('board-view-pie', pieData, pieLayout);
 
-                const spendingByCategory = DATA.reduce((acc, item) => {
-                    if (item.Category) {
-                        if (!acc[item.Category]) {
-                            acc[item.Category] = { Restricted: 0, Unrestricted: 0 };
-                        }
-                        if (item.Fund_Restriction === 'Restricted') {
-                            acc[item.Category].Restricted += item.YTD_Actual;
-                        } else {
-                            acc[item.Category].Unrestricted += item.YTD_Actual;
-                        }
+                const spendingByCategory = CLEANED_DATA.reduce((acc, item) => {
+                    const category = item.Category || 'Other';
+                    if (!acc[category]) {
+                        acc[category] = { Restricted: 0, Unrestricted: 0 };
+                    }
+                    if (item.Fund_Restriction === 'Restricted') {
+                        acc[category].Restricted += item.YTD_Actual;
+                    } else {
+                        acc[category].Unrestricted += item.YTD_Actual;
                     }
                     return acc;
                 }, {});
@@ -265,39 +275,41 @@
                         y: restrictedValues,
                         name: 'Restricted Funds',
                         type: 'bar',
-                        marker: { color: '#dc3545' }
+                        marker: { color: '#ffc107' }
                     },
                     {
                         x: categories,
                         y: unrestrictedValues,
                         name: 'Unrestricted Funds',
                         type: 'bar',
-                        marker: { color: '#28a745' }
+                        marker: { color: '#21cc72' }
                     }
                 ];
                 const barLayout = {
-                    title: 'Spending by Category',
+                    title: 'Spending by Category: Unrestricted vs Restricted',
                     barmode: 'stack',
                     height: 400,
                     margin: { t: 40, b: 100, l: 40, r: 40 },
-                    xaxis: { title: 'Category', automargin: true },
-                    yaxis: { title: 'Amount Spent ($)' }
+                    xaxis: { title: 'Category', automargin: true, tickangle: -45 },
+                    yaxis: { title: 'Amount Spent ($)' },
+                    font: { family: 'Arial, sans-serif' }
                 };
                 Plotly.newPlot('board-view-bar', barData, barLayout);
             }
 
+            // Function to render the Restricted Funds View
             function renderRestrictedView() {
-                const restrictedFunds = DATA.filter(item => item.Fund_Restriction === 'Restricted');
-                const tableContainer = document.getElementById('restricted-table');
-
+                const restrictedFunds = CLEANED_DATA.filter(item => item.Fund_Restriction === 'Restricted');
+                const tableContainer = document.getElementById('restricted-table-content');
                 let tableHTML = `
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Category</th>
-                                <th>Project Name</th>
+                                <th>Program/Teacher</th>
                                 <th>Budget</th>
                                 <th>Actual Spent</th>
+                                <th>Ending Balance</th>
                                 <th>Notes</th>
                             </tr>
                         </thead>
@@ -310,6 +322,7 @@
                             <td>${item.Subcategory || 'N/A'}</td>
                             <td>${currencyFormatter.format(item.Budget)}</td>
                             <td>${currencyFormatter.format(item.YTD_Actual)}</td>
+                            <td>${currencyFormatter.format(item.Ending_Balance)}</td>
                             <td>${item.Notes || ''}</td>
                         </tr>
                     `;
@@ -318,17 +331,58 @@
                 tableContainer.innerHTML = tableHTML;
             }
 
+            // Function to render the Static Budget View
+            function renderStaticBudgetView() {
+                const budgetTableContainer = document.getElementById('static-budget-table');
+                let budgetTableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Program</th>
+                                <th>Budget</th>
+                                <th>Actual Spent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                const mainBudgetItems = CLEANED_DATA.filter(item => item.Category.toLowerCase() !== 'teacher grants');
+                mainBudgetItems.forEach(item => {
+                    budgetTableHTML += `
+                        <tr>
+                            <td>${item.Category || 'N/A'}</td>
+                            <td>${item.Subcategory || 'N/A'}</td>
+                            <td>${currencyFormatter.format(item.Budget)}</td>
+                            <td>${currencyFormatter.format(item.YTD_Actual)}</td>
+                        </tr>
+                    `;
+                });
+                budgetTableHTML += '</tbody></table>';
+                budgetTableContainer.innerHTML = budgetTableHTML;
+            }
+
             boardBtn.addEventListener('click', () => {
                 boardView.classList.remove('hide');
                 restrictedView.classList.add('hide');
+                staticBudgetView.classList.add('hide');
+                renderBoardView();
             });
 
             restrictedBtn.addEventListener('click', () => {
                 boardView.classList.add('hide');
                 restrictedView.classList.remove('hide');
+                staticBudgetView.classList.add('hide');
                 renderRestrictedView();
             });
 
+            staticBudgetBtn.addEventListener('click', () => {
+                boardView.classList.add('hide');
+                restrictedView.classList.add('hide');
+                staticBudgetView.classList.remove('hide');
+                renderStaticBudgetView();
+            });
+
+            boardView.classList.remove('hide');
             renderBoardView();
         });
     </script>
@@ -336,11 +390,15 @@
 <body>
 
 <div class="container">
-    <h1>PTSA Funds Dashboard</h1>
+    <div class="header">
+        <img src="https://via.placeholder.com/150/21cc72/ffffff?text=Logo" alt="Company Logo">
+        <h1>PTSA Funds Dashboard</h1>
+    </div>
 
     <div class="view-toggle">
         <button id="board-btn">Board-Level View</button>
         <button id="restricted-btn">Restricted Funds View</button>
+        <button id="static-budget-btn">Budget Overview</button>
     </div>
 
     <div id="board-view">
@@ -356,9 +414,16 @@
     </div>
 
     <div id="restricted-view" class="hide">
-        <div id="individual-table">
+        <div class="table-container">
             <h2>Restricted Funds Details</h2>
-            <div id="restricted-table"></div>
+            <div id="restricted-table-content"></div>
+        </div>
+    </div>
+    
+    <div id="static-budget-view" class="hide">
+        <div class="table-container">
+            <h2>Static Budget Overview</h2>
+            <div id="static-budget-table"></div>
         </div>
     </div>
 </div>
