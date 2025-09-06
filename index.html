@@ -191,6 +191,14 @@
             {"Category":"Fundraising and Events","Subcategory":"Kindergarten Graduation (cakes)","Budget":100.0,"YTD_Actual":96.96,"Ending_Balance":0.0,"Fund_Restriction":"Unrestricted","Notes":""}
         ];
 
+        let summaryData = {};
+        const currencyFormatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const boardView = document.getElementById('board-view');
             const restrictedView = document.getElementById('restricted-view');
@@ -200,45 +208,66 @@
             const restrictedBtn = document.getElementById('restricted-btn');
             const staticBudgetBtn = document.getElementById('static-budget-btn');
 
-            const currencyFormatter = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            });
+            // Single function to process all data in one loop
+            const processData = () => {
+                const totals = {
+                    totalBudget: 0,
+                    totalSpent: 0,
+                    totalRestrictedBudget: 0,
+                    totalUnrestrictedBudget: 0,
+                    totalRestrictedSpent: 0,
+                    totalUnrestrictedSpent: 0,
+                };
+                const spendingByCategory = {};
+
+                CLEANED_DATA.forEach(item => {
+                    totals.totalBudget += item.Budget;
+                    totals.totalSpent += item.YTD_Actual;
+                    
+                    if (item.Fund_Restriction === 'Restricted') {
+                        totals.totalRestrictedBudget += item.Budget;
+                        totals.totalRestrictedSpent += item.YTD_Actual;
+                    } else {
+                        totals.totalUnrestrictedBudget += item.Budget;
+                        totals.totalUnrestrictedSpent += item.YTD_Actual;
+                    }
+
+                    const category = item.Category || 'Other';
+                    if (!spendingByCategory[category]) {
+                        spendingByCategory[category] = { Restricted: 0, Unrestricted: 0 };
+                    }
+                    if (item.Fund_Restriction === 'Restricted') {
+                        spendingByCategory[category].Restricted += item.YTD_Actual;
+                    } else {
+                        spendingByCategory[category].Unrestricted += item.YTD_Actual;
+                    }
+                });
+                
+                totals.restrictedEndingBalance = totals.totalRestrictedBudget - totals.totalRestrictedSpent;
+                totals.unrestrictedEndingBalance = totals.totalUnrestrictedBudget - totals.totalUnrestrictedSpent;
+
+                summaryData = { totals, spendingByCategory };
+            };
 
             // Function to render the Board-Level View
-            function renderBoardView() {
-                const totalBudget = CLEANED_DATA.reduce((sum, item) => sum + item.Budget, 0);
-                const totalSpent = CLEANED_DATA.reduce((sum, item) => sum + item.YTD_Actual, 0);
+            const renderBoardView = () => {
+                const { totals, spendingByCategory } = summaryData;
                 
-                const restrictedData = CLEANED_DATA.filter(item => item.Fund_Restriction === 'Restricted');
-                const unrestrictedData = CLEANED_DATA.filter(item => item.Fund_Restriction === 'Unrestricted');
-
-                const totalRestrictedBudget = restrictedData.reduce((sum, item) => sum + item.Budget, 0);
-                const totalUnrestrictedBudget = unrestrictedData.reduce((sum, item) => sum + item.Budget, 0);
-                
-                const totalRestrictedSpent = restrictedData.reduce((sum, item) => sum + item.YTD_Actual, 0);
-                const totalUnrestrictedSpent = unrestrictedData.reduce((sum, item) => sum + item.YTD_Actual, 0);
-
-                const restrictedEndingBalance = totalRestrictedBudget - totalRestrictedSpent;
-                const unrestrictedEndingBalance = totalUnrestrictedBudget - totalUnrestrictedSpent;
-
                 document.getElementById('kpi-container').innerHTML = `
-                    <div class="kpi-box"><p>${currencyFormatter.format(totalBudget)}</p><h3>Total Budget</h3></div>
-                    <div class="kpi-box"><p>${currencyFormatter.format(totalSpent)}</p><h3>Total Actual Spent</h3></div>
-                    <div class="kpi-box"><p>${currencyFormatter.format(totalUnrestrictedBudget)}</p><h3>Total Unrestricted Budget</h3></div>
-                    <div class="kpi-box"><p>${currencyFormatter.format(unrestrictedEndingBalance)}</p><h3>Total Unrestricted Balance</h3></div>
-                    <div class="kpi-box"><p>${currencyFormatter.format(totalRestrictedBudget)}</p><h3>Total Restricted Budget</h3></div>
-                    <div class="kpi-box"><p>${currencyFormatter.format(restrictedEndingBalance)}</p><h3>Total Restricted Balance</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totals.totalBudget)}</p><h3>Total Budget</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totals.totalSpent)}</p><h3>Total Actual Spent</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totals.totalUnrestrictedBudget)}</p><h3>Total Unrestricted Budget</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totals.unrestrictedEndingBalance)}</p><h3>Total Unrestricted Balance</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totals.totalRestrictedBudget)}</p><h3>Total Restricted Budget</h3></div>
+                    <div class="kpi-box"><p>${currencyFormatter.format(totals.restrictedEndingBalance)}</p><h3>Total Restricted Balance</h3></div>
                 `;
                 
                 const pieData = [{
                     labels: ['Restricted Funds Spent', 'Unrestricted Funds Spent'],
-                    values: [totalRestrictedSpent, totalUnrestrictedSpent],
+                    values: [totals.totalRestrictedSpent, totals.totalUnrestrictedSpent],
                     type: 'pie',
                     marker: {
-                        colors: ['#ffc107', '#21cc72'] // Yellow for Restricted, Green for Unrestricted
+                        colors: ['#ffc107', '#21cc72'] // Yellow for Restricted, Green for Unrestricted (Original colors)
                     },
                     hoverinfo: 'label+percent+value',
                     textinfo: 'percent',
@@ -251,19 +280,6 @@
                     font: { family: 'Arial, sans-serif' }
                 };
                 Plotly.newPlot('board-view-pie', pieData, pieLayout);
-
-                const spendingByCategory = CLEANED_DATA.reduce((acc, item) => {
-                    const category = item.Category || 'Other';
-                    if (!acc[category]) {
-                        acc[category] = { Restricted: 0, Unrestricted: 0 };
-                    }
-                    if (item.Fund_Restriction === 'Restricted') {
-                        acc[category].Restricted += item.YTD_Actual;
-                    } else {
-                        acc[category].Unrestricted += item.YTD_Actual;
-                    }
-                    return acc;
-                }, {});
 
                 const categories = Object.keys(spendingByCategory);
                 const restrictedValues = categories.map(cat => spendingByCategory[cat].Restricted);
@@ -295,10 +311,10 @@
                     font: { family: 'Arial, sans-serif' }
                 };
                 Plotly.newPlot('board-view-bar', barData, barLayout);
-            }
+            };
 
             // Function to render the Restricted Funds View
-            function renderRestrictedView() {
+            const renderRestrictedView = () => {
                 const restrictedFunds = CLEANED_DATA.filter(item => item.Fund_Restriction === 'Restricted');
                 const tableContainer = document.getElementById('restricted-table-content');
                 let tableHTML = `
@@ -316,12 +332,14 @@
                         <tbody>
                 `;
                 restrictedFunds.forEach(item => {
+                    const isOverBudget = item.YTD_Actual > item.Budget;
+                    const spentColor = isOverBudget ? 'color: red;' : '';
                     tableHTML += `
                         <tr>
                             <td>${item.Category || 'N/A'}</td>
                             <td>${item.Subcategory || 'N/A'}</td>
                             <td>${currencyFormatter.format(item.Budget)}</td>
-                            <td>${currencyFormatter.format(item.YTD_Actual)}</td>
+                            <td style="${spentColor}">${currencyFormatter.format(item.YTD_Actual)}</td>
                             <td>${currencyFormatter.format(item.Ending_Balance)}</td>
                             <td>${item.Notes || ''}</td>
                         </tr>
@@ -329,10 +347,10 @@
                 });
                 tableHTML += '</tbody></table>';
                 tableContainer.innerHTML = tableHTML;
-            }
+            };
 
             // Function to render the Static Budget View
-            function renderStaticBudgetView() {
+            const renderStaticBudgetView = () => {
                 const budgetTableContainer = document.getElementById('static-budget-table');
                 let budgetTableHTML = `
                     <table>
@@ -348,19 +366,22 @@
                 `;
                 const mainBudgetItems = CLEANED_DATA.filter(item => item.Category.toLowerCase() !== 'teacher grants');
                 mainBudgetItems.forEach(item => {
+                    const isOverBudget = item.YTD_Actual > item.Budget;
+                    const spentColor = isOverBudget ? 'color: red;' : '';
                     budgetTableHTML += `
                         <tr>
                             <td>${item.Category || 'N/A'}</td>
                             <td>${item.Subcategory || 'N/A'}</td>
                             <td>${currencyFormatter.format(item.Budget)}</td>
-                            <td>${currencyFormatter.format(item.YTD_Actual)}</td>
+                            <td style="${spentColor}">${currencyFormatter.format(item.YTD_Actual)}</td>
                         </tr>
                     `;
                 });
                 budgetTableHTML += '</tbody></table>';
                 budgetTableContainer.innerHTML = budgetTableHTML;
-            }
+            };
 
+            // Event Listeners for buttons
             boardBtn.addEventListener('click', () => {
                 boardView.classList.remove('hide');
                 restrictedView.classList.add('hide');
@@ -382,6 +403,8 @@
                 renderStaticBudgetView();
             });
 
+            // Initial view render
+            processData();
             boardView.classList.remove('hide');
             renderBoardView();
         });
@@ -422,7 +445,7 @@
     
     <div id="static-budget-view" class="hide">
         <div class="table-container">
-            <h2>Static Budget Overview</h2>
+            <h2>Budget Overview</h2>
             <div id="static-budget-table"></div>
         </div>
     </div>
@@ -430,6 +453,3 @@
 
 </body>
 </html>
-
-
-
